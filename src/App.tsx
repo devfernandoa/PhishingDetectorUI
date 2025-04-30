@@ -1,6 +1,6 @@
 // src/App.tsx
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { issueExplanations } from './issueExplanations';
 import { ExportButton } from './components/ExportButton';
 
@@ -29,7 +29,7 @@ const App: React.FC = () => {
 
   const handleAnalyze = async () => {
     setLoading(true);
-    const res = await fetch(`https://phishingdetector-production-a575.up.railway.app/analyze?url=${encodeURIComponent(url)}`);
+    const res = await fetch(`http://localhost:3000/analyze?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     setResult(data);
     setHistory(prev => [...prev, { ...data, timestamp: new Date().toISOString() }]);
@@ -43,8 +43,8 @@ const App: React.FC = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto bg-white shadow rounded-xl p-6">
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="max-w-5xl mx-auto bg-white shadow rounded-xl p-4 sm:p-6">
         <h1 className="text-3xl font-bold mb-4 text-center">Phishing Analysis Dashboard</h1>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -64,51 +64,55 @@ const App: React.FC = () => {
         </div>
 
         {result && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
+          <div className="mb-8 overflow-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
               <h2 className="text-xl font-semibold">Result for <span className="font-mono text-blue-600">{result.domain}</span></h2>
               <span
-                className="px-4 py-1 font-bold text-sm rounded-full"
-                style={{ backgroundColor: getRiskColor(result.riskScore), color: 'white' }}
+                className="px-4 py-1 font-bold text-sm rounded-full text-white"
+                style={{ backgroundColor: getRiskColor(result.riskScore) }}
               >
                 Risk Score: {result.riskScore}/100
               </span>
             </div>
-            <table className="table-auto w-full text-sm border">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left">Type</th>
-                  <th className="px-4 py-2 text-left">Message</th>
-                  <th className="px-4 py-2 text-left">Explanation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {result.issues.map((issue: any, idx: number) => (
-                  <tr key={idx} className="border-t">
-                    <td className="px-4 py-2 font-mono text-blue-800">{issue.type}</td>
-                    <td className="px-4 py-2">{issue.message}</td>
-                    <td className="px-4 py-2 text-gray-600 italic">
-                      {issueExplanations[issue.type] || 'No explanation available.'}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="table-auto min-w-full text-sm border">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Type</th>
+                    <th className="px-4 py-2 text-left">Message</th>
+                    <th className="px-4 py-2 text-left">Explanation</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {result.issues.map((issue: any, idx: number) => (
+                    <tr key={idx} className="border-t">
+                      <td className="px-4 py-2 font-mono text-blue-800">{issue.type}</td>
+                      <td className="px-4 py-2">{issue.message}</td>
+                      <td className="px-4 py-2 text-gray-600 italic">
+                        {issueExplanations[issue.type] || 'No explanation available.'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
         {history.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-white p-4 border rounded">
+            <div className="bg-white p-4 border rounded overflow-x-auto">
               <h3 className="font-bold mb-2">Issue Type Distribution</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={chartData}>
-                  <XAxis dataKey="name" fontSize={10} />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="w-full h-[250px] min-w-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData}>
+                    <XAxis dataKey="name" fontSize={10} />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
             <div className="bg-white p-4 border rounded">
