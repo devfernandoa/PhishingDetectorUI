@@ -29,7 +29,7 @@ const App: React.FC = () => {
 
   const handleAnalyze = async () => {
     setLoading(true);
-    const res = await fetch(`http://localhost:3000/analyze?url=${encodeURIComponent(url)}`);
+    const res = await fetch(`https://phishingdetector-production-a575.up.railway.app/analyze?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     setResult(data);
     setHistory(prev => [...prev, { ...data, timestamp: new Date().toISOString() }]);
